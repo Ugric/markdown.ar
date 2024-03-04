@@ -8,7 +8,6 @@ let markdown(text) = do
     let i = 0
     while (i < lines.length) do
         let skip = 1
-        term.log(lines[i])
         if (lines[i].startswith("#")) do
             output.append(header.header(lines, i))
         else if (lines[i].startswith("```")) do
