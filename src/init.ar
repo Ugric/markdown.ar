@@ -1,0 +1,14 @@
+import "header" as header
+import "bleach.ar" as bleach
+
+let markdown(text) = do
+    let lines = text.split("\n")
+    let output = []
+    for (i from 0 to lines.length) do
+        if (lines[i].startswith("#")) do
+            output.append(header.header(lines[i]))
+        else do
+            output.append("<p>"+bleach.clean(lines[i].strip())+"</p>")
+    return output.join("")
+
+term.log(markdown("#text\ntesting\nnice"))

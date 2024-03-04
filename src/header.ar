@@ -1,0 +1,8 @@
+import "bleach.ar" as bleach
+
+let header(text) = do
+    let content = text.leftstrip("#")
+    let type = text.length - content.length
+    if (type>6) type = 6
+    type = string(type)
+    return "<h"+type+">"+bleach.clean(content.strip())+"</h"+type+">"
