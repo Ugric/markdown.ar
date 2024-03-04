@@ -10,5 +10,3 @@ let markdown(text) = do
         else do
             output.append("<p>"+bleach.clean(lines[i].strip())+"</p>")
     return output.join("")
-
-term.log(markdown("#text\ntesting\nnice"))
