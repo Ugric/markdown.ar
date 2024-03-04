@@ -1,12 +1,24 @@
 import "header" as header
+import "code" as code
 import "bleach.ar" as bleach
 
 let markdown(text) = do
     let lines = text.split("\n")
     let output = []
-    for (i from 0 to lines.length) do
+    let i = 0
+    while (i < lines.length) do
+        let skip = 1
+        term.log(lines[i])
         if (lines[i].startswith("#")) do
-            output.append(header.header(lines[i]))
+            output.append(header.header(lines, i))
+        else if (lines[i].startswith("```")) do
+            resp = code.code(lines,i)
+            output.append(resp.text)
+            skip = resp.skip
         else do
-            output.append("<p>"+bleach.clean(lines[i].strip())+"</p>")
+            output.append("<p class=\"md_p\">"+bleach.clean(lines[i].strip())+"</p>")
+        i += skip
     return output.join("")
+
+if (program.main) do
+    term.log(markdown("#hello\nworld\n##this is epic\n######wow\n```\nif (true) do\n\tterm.log('hello world')```"))
