@@ -1,23 +1,79 @@
-import "header" as header
-import "code" as code
 import "bleach.ar" as bleach
+
+let idify(text) = do
+    if (text.length == 0) do
+        return "-"
+    return text.strip().lower().replace(" ", "-")
 
 let markdown(text) = do
     let lines = text.split("\n")
+    let currentlyIn = []
     let output = []
     let i = 0
+    let lastCurrent() = do
+        if (currentlyIn.length != 0) do
+            return currentlyIn[-1]
+        return null
+    let closeCurrent() = do
+        if (currentlyIn.length != 0) do
+            output.append("</"+currentlyIn[-1]+">")
+            currentlyIn.pop()
     while (i < lines.length) do
-        let skip = 1
-        if (lines[i].startswith("#")) do
-            output.append(header.header(lines, i))
+        let step = 1
+        if (lines[i].strip().length == 0) do
+            closeCurrent()
+            i += step
+            continue
+        else if (currentlyIn) do
+            if (lastCurrent() == "pre") do
+                if (lines[i].strip() == "```") do
+                    closeCurrent()
+                    i += step
+                    continue
+                else do
+                    output.append(bleach.clean(lines[i])+ "\n")
+        if (lines[i].startswith("###### ")) do
+            closeCurrent()
+            output.append("<h6>"+bleach.clean(lines[i].strip()[7:]))
+            currentlyIn.append("h6")
+        else if (lines[i].startswith("##### ")) do
+            closeCurrent()
+            output.append("<h5>"+bleach.clean(lines[i].strip()[6:]))
+            currentlyIn.append("h5")
+        else if (lines[i].startswith("#### ")) do
+            closeCurrent()
+            output.append("<h4>"+bleach.clean(lines[i].strip()[5:]))
+            currentlyIn.append("h4")
+        else if (lines[i].startswith("### ")) do
+            closeCurrent()
+            output.append("<h3>"+bleach.clean(lines[i].strip()[4:]))
+            currentlyIn.append("h3")
+        else if (lines[i].startswith("## ")) do
+            closeCurrent()
+            output.append("<h2>"+bleach.clean(lines[i].strip()[3:]))
+            currentlyIn.append("h2")
+        else if (lines[i].startswith("# ")) do
+            closeCurrent()
+            output.append("<h1>"+bleach.clean(lines[i].strip()[2:]))
+            currentlyIn.append("h1")
         else if (lines[i].startswith("```")) do
-            resp = code.code(lines,i)
-            output.append(resp.text)
-            skip = resp.skip
-        else do
-            output.append("<p class=\"md_p\">"+bleach.clean(lines[i].strip())+"</p>")
-        i += skip
+            closeCurrent()
+            language = lines[i][3:].strip()
+            if (language.length == 0) do
+                output.append("<pre>")
+            else do
+                output.append("<pre class=\"lang-"+bleach.clean(language)+"\">")
+            currentlyIn.append("pre")
+        else if (lines[i].strip().length != 0) do
+            if (lastCurrent() == "p") do
+                output.append(bleach.clean(lines[i]))
+            else do
+                closeCurrent()
+                output.append("<p>"+bleach.clean(lines[i]))
+                currentlyIn.append("p")
+        i += step
+    closeCurrent()
     return output.join("")
 
 if (program.main) do
-    term.log(markdown("#hello\nworld\n##this is epic\n######wow\n```\nif (true) do\n\tterm.log('hello world')```"))
+    term.log(markdown(file.read("markdown.md").text()))
