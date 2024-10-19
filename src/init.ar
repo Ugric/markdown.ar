@@ -24,14 +24,14 @@ let markdown(text) = do
             closeCurrent()
             i += step
             continue
-        else if (currentlyIn) do
+        else if (currentlyIn.length) do
             if (lastCurrent() == "pre") do
                 if (lines[i].strip() == "```") do
                     closeCurrent()
-                    i += step
-                    continue
                 else do
                     output.append(bleach.clean(lines[i])+ "\n")
+                i += step
+                continue
         if (lines[i].startswith("###### ")) do
             closeCurrent()
             output.append("<h6>"+bleach.clean(lines[i].strip()[7:]))
